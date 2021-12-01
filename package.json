@@ -1,10 +1,8 @@
 {
   "name": "dev-dids",
   "version": "1.0.0",
-  "description": "Developers Decentralized Identifiers",
-  "main": "index.js",
+  "description": "Developers Decentralized Identifiers implementation with solidity and hardhat",
   "repository": "https://github.com/mohsenpakzad/dev-dids.git",
-  "author": "Mohsen Pakzad <mohsen137853@gmail.com>",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",
