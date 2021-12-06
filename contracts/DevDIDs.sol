@@ -9,6 +9,6 @@ import "./interfaces/IHolder.sol";
 import "./interfaces/IIssuer.sol";
 import "./interfaces/IVerifier.sol";
 
-contract DevDIDs is ERC721, IHolder, IIssuer, IVerifier {
+contract DevDIDs {
 
 }
