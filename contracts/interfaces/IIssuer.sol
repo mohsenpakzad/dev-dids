@@ -6,7 +6,7 @@ interface IIssuer {
 
 
 
-    function issue(address issuer, address subject,bytes32 data, uint256 validFrom, uint256 validTo) external returns(VerifiableCredential memory);
+    function issue(address holder, address issuer, bytes32 subject,bytes32 data, uint256 validFrom, uint256 validTo) external returns(VerifiableCredential memory);
     
     event revoke(VerifiableCredential credential);    
 

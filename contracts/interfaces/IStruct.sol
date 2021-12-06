@@ -3,8 +3,9 @@
 pragma solidity ^0.8.10;
 
 struct VerifiableCredential {
+    address holder;
     address issuer;
-    address subject;
+    bytes32 subject;
     bytes32 data;
     uint256 validFrom;
     uint256 validTo;
