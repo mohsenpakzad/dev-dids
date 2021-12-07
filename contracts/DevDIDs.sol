@@ -33,6 +33,7 @@ contract DevDIDs is ERC721 {
     mapping(address => uint256[]) private verifiableCredentialIssuers;
     mapping(address => uint256[]) private verifiableCredentialHolders;
 
+    event Issue(address issuer, address holder, uint vcId);
 
     constructor() ERC721("Verifiable Credential", "VC"){}
 
@@ -67,7 +68,7 @@ contract DevDIDs is ERC721 {
         verifiableCredentialIssuers[msg.sender].push(vcId);
         verifiableCredentialHolders[to].push(vcId);
 
-        return vcId;
+        emit Issue(msg.sender, to, vcId);
     }
 
     function vcsOfIssuer(
