@@ -61,6 +61,20 @@ describe("DevDIDs", function () {
         )
       ).to.be.revertedWith("DevDIDs: self issuing is not permitted");
     });
+
+    it("Should fail if valid from is later than valid to", async function () {
+      let owner, addr1,addr2,addrs;
+      [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
+      await expect(
+        devDIDs.issue(
+          addr1.address,
+          "Zahra MohammadPour",
+          "Has completed first sprint",
+          20,
+          5
+        )
+      ).to.be.revertedWith("DevDIDs: vc valid from must be greater than valid to");
+    });
   });
 
   describe("Holder", async () => {
@@ -123,6 +137,35 @@ describe("DevDIDs", function () {
       await expect(devDIDs.generateVp([1, 3, 10], 5, 12)).to.be.revertedWith(
         "DevDIDs: all of the vcs must belong to you"
       );
+    });
+
+    it("Should fail if valid from for vp is later than valid to", async function () {
+      
+      const [, addr1] = await ethers.getSigners();
+
+      await devDIDs.issue(
+        addr1.address,
+        "Zahra MohammadPour",
+        "Has completed first sprint1",
+        5,
+        20
+      );
+      await devDIDs.issue(
+        addr1.address,
+        "Zahra MohammadPour",
+        "Has completed first sprint2",
+        5,
+        20
+      );
+      await devDIDs.issue(
+        addr1.address,
+        "Zahra MohammadPour",
+        "Has completed first sprint3",
+        5,
+        20
+      );
+      await expect( devDIDs.connect(addr1).generateVp([1, 3], 12, 5)
+              ).to.be.revertedWith("DevDIDs: vp valid from must be greater than valid to");
     });
   });
 
