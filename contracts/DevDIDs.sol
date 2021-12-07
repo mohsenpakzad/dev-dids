@@ -1,68 +1,131 @@
-// Be name khoda
+// Be name Khoda
+// Bime Abolfazl
+
 // SPDX-License-Identifier: GPL-3.0-or-later
-import "./interfaces/IStruct.sol";
 
 pragma solidity ^0.8.10;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-import "./interfaces/IHolder.sol";
-import "./interfaces/IIssuer.sol";
-import "./interfaces/IVerifier.sol";
+contract DevDIDs is ERC721 {
 
-contract DevDIDs is ERC721, IHolder, IIssuer, IVerifier {
+    struct VerifiableCredential {
+        address issuer;
+        address holder;
+        string subject;
+        string data;
+        uint256 validFrom;
+        uint256 validTo;
+    }
+
+    struct VerifiablePresentation {
+        uint256[] vcs;
+        uint256 validFrom;
+        uint256 validTo;
+    }
 
     using Counters for Counters.Counter;
+
     Counters.Counter private _tokenIds;
-    uint256 cnt; 
-    mapping (uint256 => VerifiableCredential) private dataRegistery;
-    
-    constructor() public ERC721("DevDID", "DID") {}
+    mapping(uint256 => VerifiableCredential) public verifiableCredentials;
 
-    function awardItem(address holder, uint256 newItemId)
-        public
-        returns (uint256)
-    {
-        _mint(holder, newItemId);
-        
-        return newItemId;
-    }
+    mapping(address => uint256[]) private verifiableCredentialIssuers;
+    mapping(address => uint256[]) private verifiableCredentialHolders;
 
-    function issue(address holder, address issuer, bytes32 subject,bytes32 data, uint256 validFrom, uint256 validTo) external returns(VerifiableCredential memory)
+
+    constructor() ERC721("Verifiable Credential", "VC"){}
+
+    function issue(
+        address to,
+        string memory subject_,
+        string memory data_,
+        uint256 validFrom_,
+        uint256 validTo_
+    )
+        external
+        returns(uint)
     {
-        cnt = cnt + 1;
+        // reject self issuing
+        require(msg.sender != to, "self issuing is not permitted");
+
+
         _tokenIds.increment();
-        uint256 newItemId = _tokenIds.current();
+        uint256 vcId = _tokenIds.current();
 
-        VerifiableCredential memory verifiableCredential = VerifiableCredential(holder, issuer, subject, data, validFrom, validTo) ;
-        dataRegistery[newItemId] = verifiableCredential;
-        
-        awardItem(holder, newItemId);
-        return verifiableCredential;
+        _safeMint(to, vcId);
+
+        verifiableCredentials[vcId] = VerifiableCredential({
+        issuer: msg.sender,
+        holder: to,
+        subject: subject_,
+        data: data_,
+        validFrom: validFrom_,
+        validTo: validTo_
+        });
+
+        verifiableCredentialIssuers[msg.sender].push(vcId);
+        verifiableCredentialHolders[to].push(vcId);
+
+        return vcId;
     }
-    // override
-    // function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
-    //    // require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
 
-    //    // string memory baseURI = _baseURI();
-    //    // return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString())) : "";
-    //     string memory baseURI = dataRegistery[tokenId].holder + "\n"+   
-    // }
+    function vcsOfIssuer(
+        address address_
+    )
+        external
+        view
+        returns(uint256[] memory)
+    {
+        return verifiableCredentialIssuers[address_];
+    }
 
-    function getVCs(address holder) external view returns(VerifiableCredential[] memory){
-       VerifiableCredential[] memory ls = new VerifiableCredential[](15);
-       uint256 j;
-       j = 0;
-        for(uint256 i=0; i< cnt; i++){
-            if(holder == ownerOf(i)){
-                
-              ls[j] = dataRegistery[i];
-              j += 1;
-            }
+    function vcsOfHolder(
+        address address_
+    )
+        external
+        view
+        returns(uint256[] memory)
+    {
+        return verifiableCredentialHolders[address_];
+    }
 
+    function generateVp(
+        uint256[] calldata userVcs,
+        uint256 validFrom_,
+        uint256 validTo_
+    )
+        external
+        view
+        returns(VerifiablePresentation memory)
+    {
+        // check if msg.sender owns all these vcs
+        for(uint i = 0 ; i < userVcs.length ; i++){
+            require(ownerOf(userVcs[i]) == msg.sender, "All of the vcs must belong to you");
         }
-        return ls;
+
+        VerifiablePresentation memory vp = VerifiablePresentation({
+        vcs: userVcs,
+        validFrom: validFrom_,
+        validTo: validTo_
+        });
+
+        return vp;
+    }
+
+    function verify(
+        VerifiablePresentation memory vp,
+        address holder
+    )
+        external
+        view
+        returns(bool)
+    {
+        for(uint i = 0 ; i < vp.vcs.length ; i++){
+            if(ownerOf(vp.vcs[i]) != holder) return false;
+        }
+        return true;
     }
 
 }
+// Dar panah khoda
