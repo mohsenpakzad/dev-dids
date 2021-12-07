@@ -12,30 +12,62 @@ describe("DevDIDs", function () {
   });
 
   describe("Issuer", async () => {
-    it("The Balance should be equal to three", async function(){
-      let owner, addr1,addr2,addrs;
-      [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
+    it("The Balance should be equal to three", async function () {
+      const [, addr1] = await ethers.getSigners();
 
-      devDIDs.issue(addr1.address,"ZahraMohammadPour","Has compeleted first sprint",5,20);
-      devDIDs.issue(addr1.address,"ZahraMohammadPour","Has got driving license",5,20);
-      devDIDs.issue(addr1.address,"ZahraMohammadPour","Has compeleted her course",5,20);
+      await devDIDs.issue(
+        addr1.address,
+        "Zahra MohammadPour",
+        "Has completed first sprint",
+        5,
+        20
+      );
+      await devDIDs.issue(
+        addr1.address,
+        "Zahra MohammadPour",
+        "Has got driving license",
+        5,
+        20
+      );
+      await devDIDs.issue(
+        addr1.address,
+        "Zahra MohammadPour",
+        "Has completed her course",
+        5,
+        20
+      );
 
       expect(await devDIDs.balanceOf(addr1.address)).to.equal(3);
-
-
     });
-    it("The number of holder vcs should be equal to three", async function(){
-    let owner, addr1,addr2,addrs;
-    [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
 
-    devDIDs.issue(addr1.address,"ZahraMohammadPour","Has compeleted first sprint",5,20);
-    devDIDs.issue(addr1.address,"ZahraMohammadPour","Has got driving license",5,20);
-    devDIDs.issue(addr1.address,"ZahraMohammadPour","Has compeleted her course",5,20);
+    it("The number of holder vcs should be equal to three", async function () {
+      const [, addr1] = await ethers.getSigners();
 
-    expect((await devDIDs.vcsOfHolder(addr1.address)).length).to.equal(3);
+      await devDIDs.issue(
+        addr1.address,
+        "ZahraMohammadPour",
+        "Has completed first sprint",
+        5,
+        20
+      );
+      await devDIDs.issue(
+        addr1.address,
+        "Zahra MohammadPour",
+        "Has got driving license",
+        5,
+        20
+      );
+      await devDIDs.issue(
+        addr1.address,
+        "ZahraMohammadPour",
+        "Has completed her course",
+        5,
+        20
+      );
 
+      expect((await devDIDs.vcsOfHolder(addr1.address)).length).to.equal(3);
     });
-    
+
     it("should return address of owner of vc1 addr1", async function () {
       const [, addr1] = await ethers.getSigners();
 
