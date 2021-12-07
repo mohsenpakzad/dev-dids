@@ -3,12 +3,19 @@
 
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+// Primary Author(s)
+// Mohsen: https://github.com/mohsenpakzad
+// Shima: https://github.com/shima78
+// Saina: https://github.com/SainaDaneshmandjahromi
+// Amin: https://github.com/OoAminoO
+
 pragma solidity ^0.8.10;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract DevDIDs is ERC721 {
+    using Counters for Counters.Counter;
 
     struct VerifiableCredential {
         address issuer;
@@ -25,11 +32,8 @@ contract DevDIDs is ERC721 {
         uint256 validTo;
     }
 
-    using Counters for Counters.Counter;
-
     Counters.Counter private _tokenIds;
     mapping(uint256 => VerifiableCredential) public verifiableCredentials;
-
     mapping(address => uint256[]) private verifiableCredentialIssuers;
     mapping(address => uint256[]) private verifiableCredentialHolders;
 
@@ -45,7 +49,7 @@ contract DevDIDs is ERC721 {
         uint256 validTo_
     )
         external
-        returns(uint)
+        returns(uint vcId)
     {
         // reject self issuing
         require(msg.sender != to, "self issuing is not permitted");
@@ -53,17 +57,17 @@ contract DevDIDs is ERC721 {
         require(validTo_ > validFrom_, "DevDIDs: vc valid from must be greater than valid to");
 
         _tokenIds.increment();
-        uint256 vcId = _tokenIds.current();
+        vcId = _tokenIds.current();
 
         _safeMint(to, vcId);
 
         verifiableCredentials[vcId] = VerifiableCredential({
-        issuer: msg.sender,
-        holder: to,
-        subject: subject_,
-        data: data_,
-        validFrom: validFrom_,
-        validTo: validTo_
+            issuer: msg.sender,
+            holder: to,
+            subject: subject_,
+            data: data_,
+            validFrom: validFrom_,
+            validTo: validTo_
         });
 
         verifiableCredentialIssuers[msg.sender].push(vcId);
@@ -99,23 +103,21 @@ contract DevDIDs is ERC721 {
     )
         external
         view
-        returns(VerifiablePresentation memory)
+        returns(VerifiablePresentation memory vp)
     {
         // require valid to is greater than valid from
         require(validTo_ > validFrom_, "DevDIDs: vp valid from must be greater than valid to");
 
         // check if msg.sender owns all these vcs
         for(uint i = 0 ; i < userVcs.length ; i++){
-            require(ownerOf(userVcs[i]) == msg.sender, "All of the vcs must belong to you");
+            require(ownerOf(userVcs[i]) == msg.sender, "DevDIDs: all of the vcs must belong to you");
         }
 
-        VerifiablePresentation memory vp = VerifiablePresentation({
-        vcs: userVcs,
-        validFrom: validFrom_,
-        validTo: validTo_
+        vp = VerifiablePresentation({
+            vcs: userVcs,
+            validFrom: validFrom_,
+            validTo: validTo_
         });
-
-        return vp;
     }
 
     function verify(
