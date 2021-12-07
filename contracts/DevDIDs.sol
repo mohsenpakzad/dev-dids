@@ -49,7 +49,8 @@ contract DevDIDs is ERC721 {
     {
         // reject self issuing
         require(msg.sender != to, "self issuing is not permitted");
-
+        // require valid to is greater than valid from
+        require(validTo_ > validFrom_, "DevDIDs: vc valid from must be greater than valid to");
 
         _tokenIds.increment();
         uint256 vcId = _tokenIds.current();
@@ -100,6 +101,9 @@ contract DevDIDs is ERC721 {
         view
         returns(VerifiablePresentation memory)
     {
+        // require valid to is greater than valid from
+        require(validTo_ > validFrom_, "DevDIDs: vp valid from must be greater than valid to");
+
         // check if msg.sender owns all these vcs
         for(uint i = 0 ; i < userVcs.length ; i++){
             require(ownerOf(userVcs[i]) == msg.sender, "All of the vcs must belong to you");
