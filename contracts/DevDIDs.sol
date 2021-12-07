@@ -52,7 +52,7 @@ contract DevDIDs is ERC721 {
         returns(uint vcId)
     {
         // reject self issuing
-        require(msg.sender != to, "self issuing is not permitted");
+        require(msg.sender != to, "DevDIDs: self issuing is not permitted");
         // require valid to is greater than valid from
         require(validTo_ > validFrom_, "DevDIDs: vc valid from must be greater than valid to");
 
