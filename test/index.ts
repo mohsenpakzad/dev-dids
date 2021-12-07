@@ -45,7 +45,7 @@ describe("DevDIDs", function () {
 
       await devDIDs.issue(
         addr1.address,
-        "ZahraMohammadPour",
+        "Zahra MohammadPour",
         "Has completed first sprint",
         5,
         20
@@ -59,7 +59,7 @@ describe("DevDIDs", function () {
       );
       await devDIDs.issue(
         addr1.address,
-        "ZahraMohammadPour",
+        "Zahra MohammadPour",
         "Has completed her course",
         5,
         20
@@ -95,8 +95,7 @@ describe("DevDIDs", function () {
     });
 
     it("Should fail if valid from is later than valid to", async function () {
-      let owner, addr1,addr2,addrs;
-      [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
+      const [, addr1] = await ethers.getSigners();
       await expect(
         devDIDs.issue(
           addr1.address,
@@ -105,7 +104,9 @@ describe("DevDIDs", function () {
           20,
           5
         )
-      ).to.be.revertedWith("DevDIDs: vc valid from must be greater than valid to");
+      ).to.be.revertedWith(
+        "DevDIDs: vc valid from must be greater than valid to"
+      );
     });
   });
 
@@ -172,7 +173,6 @@ describe("DevDIDs", function () {
     });
 
     it("Should fail if valid from for vp is later than valid to", async function () {
-      
       const [, addr1] = await ethers.getSigners();
 
       await devDIDs.issue(
@@ -196,8 +196,11 @@ describe("DevDIDs", function () {
         5,
         20
       );
-      await expect( devDIDs.connect(addr1).generateVp([1, 3], 12, 5)
-              ).to.be.revertedWith("DevDIDs: vp valid from must be greater than valid to");
+      await expect(
+        devDIDs.connect(addr1).generateVp([1, 3], 12, 5)
+      ).to.be.revertedWith(
+        "DevDIDs: vp valid from must be greater than valid to"
+      );
     });
   });
 
