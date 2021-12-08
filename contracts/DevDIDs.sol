@@ -22,20 +22,20 @@ contract DevDIDs is ERC721 {
         address holder;
         string subject;
         string data;
-        uint256 validFrom;
-        uint256 validTo;
+        uint validFrom;
+        uint validTo;
     }
 
     struct VerifiablePresentation {
-        uint256[] vcs;
-        uint256 validFrom;
-        uint256 validTo;
+        uint[] vcs;
+        uint validFrom;
+        uint validTo;
     }
 
     Counters.Counter private _tokenIds;
-    mapping(uint256 => VerifiableCredential) public verifiableCredentials;
-    mapping(address => uint256[]) private verifiableCredentialIssuers;
-    mapping(address => uint256[]) private verifiableCredentialHolders;
+    mapping(uint => VerifiableCredential) public verifiableCredentials;
+    mapping(address => uint[]) private verifiableCredentialIssuers;
+    mapping(address => uint[]) private verifiableCredentialHolders;
 
     event Issue(address issuer, address holder, uint vcId);
 
@@ -45,8 +45,8 @@ contract DevDIDs is ERC721 {
         address to,
         string memory subject_,
         string memory data_,
-        uint256 validFrom_,
-        uint256 validTo_
+        uint validFrom_,
+        uint validTo_
     )
         external
         returns(uint vcId)
@@ -81,7 +81,7 @@ contract DevDIDs is ERC721 {
     )
         external
         view
-        returns(uint256[] memory)
+        returns(uint[] memory)
     {
         return verifiableCredentialIssuers[address_];
     }
@@ -91,15 +91,15 @@ contract DevDIDs is ERC721 {
     )
         external
         view
-        returns(uint256[] memory)
+        returns(uint[] memory)
     {
         return verifiableCredentialHolders[address_];
     }
 
     function generateVp(
-        uint256[] calldata userVcs,
-        uint256 validFrom_,
-        uint256 validTo_
+        uint[] calldata userVcs,
+        uint validFrom_,
+        uint validTo_
     )
         external
         view
