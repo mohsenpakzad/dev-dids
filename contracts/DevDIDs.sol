@@ -39,7 +39,7 @@ contract DevDIDs is ERC721 {
 
     event Issue(address issuer, address holder, uint vcId);
 
-    constructor() ERC721("Verifiable Credential", "VC"){}
+    constructor() ERC721("Developers Decentralized Identifier", "DevDID") {}
 
     function issue(
         address to,
