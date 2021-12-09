@@ -24,6 +24,7 @@ contract DevDIDs is ERC721 {
         string data;
         uint validFrom;
         uint validTo;
+        bool suspended;
     }
 
     struct VerifiablePresentation {
@@ -38,6 +39,7 @@ contract DevDIDs is ERC721 {
     mapping(address => uint[]) private verifiableCredentialHolders;
 
     event Issue(address issuer, address holder, uint vcId);
+    event Suspend(address issuer, address holder, uint vcId, bool suspended);
 
     constructor() ERC721("Developers Decentralized Identifier", "DevDID") {}
 
@@ -67,13 +69,28 @@ contract DevDIDs is ERC721 {
             subject: subject_,
             data: data_,
             validFrom: validFrom_,
-            validTo: validTo_
+            validTo: validTo_,
+            suspended: false
         });
 
         verifiableCredentialIssuers[msg.sender].push(vcId);
         verifiableCredentialHolders[to].push(vcId);
 
         emit Issue(msg.sender, to, vcId);
+    }
+
+    function setSuspended(
+        uint vcId,
+        bool suspended
+    )
+        external
+    {
+        VerifiableCredential storage vc = verifiableCredentials[vcId];
+        require(vc.issuer == msg.sender, "DevDIDs: you cannot change suspended status of vc that you not issued");
+
+        vc.suspended = suspended;
+
+        emit Suspend(msg.sender, vc.holder, vcId, suspended);
     }
 
     function vcsOfIssuer(
