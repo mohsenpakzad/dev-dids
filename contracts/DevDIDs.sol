@@ -17,6 +17,8 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 contract DevDIDs is ERC721 {
     using Counters for Counters.Counter;
 
+    /* ========== STRUCTS ========== */
+
     struct VerifiableCredential {
         address issuer;
         address holder;
@@ -33,17 +35,25 @@ contract DevDIDs is ERC721 {
         uint validTo;
     }
 
+    /* ========== STATE VARIABLES ========== */
+
     Counters.Counter private _tokenIds;
     mapping(uint => VerifiableCredential) private verifiableCredentials;
     mapping(address => uint[]) private verifiableCredentialIssuers;
     mapping(address => uint[]) private verifiableCredentialHolders;
+
+    /* ========== EVENTS ========== */
 
     event Issue(address issuer, address holder, uint vcId);
     event Revoke(address issuer, address holder, uint vcId);
     event Suspend(address issuer, address holder, uint vcId, bool suspended);
     event Delete(address holder, address issuer, uint vcId);
 
+    /* ========== CONSTRUCTOR ========== */
+
     constructor() ERC721("Developers Decentralized Identifier", "DevDID") {}
+
+    /* ========== EXTERNAL FUNCTIONS ========== */
 
     function issue(
         address to,
@@ -124,6 +134,9 @@ contract DevDIDs is ERC721 {
 
         emit Delete(msg.sender, vc.issuer, vcId);
     }
+
+
+    /* ========== EXTERNAL FUNCTIONS THAT ARE VIEW ========== */
 
     function getVc(
         uint vcId
@@ -219,6 +232,9 @@ contract DevDIDs is ERC721 {
         }
         return (true, "");
     }
+
+
+    // ========== PRIVATE FUNCTIONS ========== */
 
     function _removeVcFromHolderAndIssuer(
         uint vcId,
