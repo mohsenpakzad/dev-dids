@@ -230,9 +230,12 @@ describe("DevDIDs", function () {
         20
       );
 
-      const res = await devDIDs.connect(addr1).generateVp([1, 3], 5, 12);
+      const vp = await devDIDs.connect(addr1).generateVp([1, 3], 5, 12);
 
-      await expect(await devDIDs.verify(res, addr1.address)).to.equal(true);
+      await expect(await devDIDs.verify(vp, addr1.address, 5)).deep.equal([
+        true,
+        "",
+      ]);
     });
 
     it("Should return false if vp is not valid", async function () {
@@ -267,9 +270,12 @@ describe("DevDIDs", function () {
         20
       );
 
-      const res = await devDIDs.connect(addr1).generateVp([1, 2, 3], 5, 12);
+      const vp = await devDIDs.connect(addr1).generateVp([1, 2, 3], 5, 12);
 
-      await expect(await devDIDs.verify(res, addr2.address)).to.equal(false);
+      await expect(await devDIDs.verify(vp, addr2.address, 5)).deep.equal([
+        false,
+        "DevDIDs: holder is not owner of all vcs",
+      ]);
     });
   });
 });
