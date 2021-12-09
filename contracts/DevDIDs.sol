@@ -39,7 +39,9 @@ contract DevDIDs is ERC721 {
     mapping(address => uint[]) private verifiableCredentialHolders;
 
     event Issue(address issuer, address holder, uint vcId);
+    event Revoke(address issuer, address holder, uint vcId);
     event Suspend(address issuer, address holder, uint vcId, bool suspended);
+    event Delete(address holder, address issuer, uint vcId);
 
     constructor() ERC721("Developers Decentralized Identifier", "DevDID") {}
 
@@ -79,6 +81,21 @@ contract DevDIDs is ERC721 {
         emit Issue(msg.sender, to, vcId);
     }
 
+    function revoke(
+        uint vcId
+    )
+        external
+    {
+        VerifiableCredential memory vc = verifiableCredentials[vcId];
+        require(vc.issuer == msg.sender, "DevDIDs: you cannot revoke vc that you not issued");
+
+        _burn(vcId);
+        _removeVcFromHolderAndIssuer(vcId, vc.holder, vc.issuer);
+        delete verifiableCredentials[vcId];
+
+        emit Revoke(msg.sender, vc.holder, vcId);
+    }
+
     function setSuspended(
         uint vcId,
         bool suspended
@@ -91,6 +108,21 @@ contract DevDIDs is ERC721 {
         vc.suspended = suspended;
 
         emit Suspend(msg.sender, vc.holder, vcId, suspended);
+    }
+
+    function delete_(
+        uint vcId
+    )
+        external
+    {
+        VerifiableCredential memory vc = verifiableCredentials[vcId];
+        require(vc.holder == msg.sender, "DevDIDs: you cannot delete vc that you not held");
+
+        _burn(vcId);
+        _removeVcFromHolderAndIssuer(vcId, vc.holder, vc.issuer);
+        delete verifiableCredentials[vcId];
+
+        emit Delete(msg.sender, vc.issuer, vcId);
     }
 
     function getVc(
@@ -162,5 +194,28 @@ contract DevDIDs is ERC721 {
         return true;
     }
 
+    function _removeVcFromHolderAndIssuer(
+        uint vcId,
+        address holder,
+        address issuer
+    )
+        private
+    {
+        uint[] storage holderVcs = verifiableCredentialHolders[holder];
+        for (uint i = 0; i < holderVcs.length; i++) {
+            if (holderVcs[i] == vcId) {
+                delete holderVcs[i];
+                break;
+            }
+        }
+
+        uint[] storage issuerVcs = verifiableCredentialIssuers[issuer];
+        for (uint i = 0; i < issuerVcs.length; i++) {
+            if (issuerVcs[i] == vcId) {
+                delete issuerVcs[i];
+                break;
+            }
+        }
+    }
 }
 // Dar panah khoda
