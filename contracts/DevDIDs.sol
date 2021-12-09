@@ -169,8 +169,17 @@ contract DevDIDs is ERC721 {
         require(validTo_ > validFrom_, "DevDIDs: vp valid from must be greater than valid to");
 
         // check if msg.sender owns all these vcs
-        for(uint i = 0 ; i < userVcs.length ; i++){
-            require(ownerOf(userVcs[i]) == msg.sender, "DevDIDs: all of the vcs must belong to you");
+        for (uint i = 0; i < userVcs.length; i++) {
+            require(_exists(userVcs[i]), "DevDIDs: some vcs are not exists");
+
+            VerifiableCredential memory vc = verifiableCredentials[userVcs[i]];
+
+            require(vc.holder == msg.sender, "DevDIDs: all of the vcs must belong to you");
+            require(vc.suspended == false, "DevDIDs: some vcs are suspended");
+            require(
+                validFrom_ >= vc.validFrom && validTo_ <= vc.validTo,
+                "DevDIDs: valid from must less than all vcs valid from and greater than all vcs valid to"
+            );
         }
 
         vp = VerifiablePresentation({
@@ -182,16 +191,33 @@ contract DevDIDs is ERC721 {
 
     function verify(
         VerifiablePresentation memory vp,
-        address holder
+        address holder,
+        uint currentDate
     )
         external
         view
-        returns(bool)
+        returns(bool, string memory)
     {
-        for(uint i = 0 ; i < vp.vcs.length ; i++){
-            if(ownerOf(vp.vcs[i]) != holder) return false;
+        if (currentDate < vp.validFrom || currentDate > vp.validTo) {
+            return (false, "DevDIDs: vp is expired or not started yet");
         }
-        return true;
+
+        for (uint i = 0; i < vp.vcs.length; i++) {
+            if (!_exists(vp.vcs[i]))
+                return (false, "DevDIDs: some vcs are revoked or not exists");
+
+            VerifiableCredential memory vc = verifiableCredentials[vp.vcs[i]];
+
+            if (vc.holder != holder)
+                return (false, "DevDIDs: holder is not owner of all vcs");
+
+            if (vc.suspended == true)
+                return (false, "DevDIDs: some vcs are suspended");
+
+            if (currentDate < vc.validFrom || currentDate > vc.validTo)
+                return (false, "DevDIDs: some vcs are expired or not started yet");
+        }
+        return (true, "");
     }
 
     function _removeVcFromHolderAndIssuer(
