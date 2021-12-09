@@ -34,7 +34,7 @@ contract DevDIDs is ERC721 {
     }
 
     Counters.Counter private _tokenIds;
-    mapping(uint => VerifiableCredential) public verifiableCredentials;
+    mapping(uint => VerifiableCredential) private verifiableCredentials;
     mapping(address => uint[]) private verifiableCredentialIssuers;
     mapping(address => uint[]) private verifiableCredentialHolders;
 
@@ -91,6 +91,17 @@ contract DevDIDs is ERC721 {
         vc.suspended = suspended;
 
         emit Suspend(msg.sender, vc.holder, vcId, suspended);
+    }
+
+    function getVc(
+        uint vcId
+    )
+        external
+        view
+        returns(VerifiableCredential memory)
+    {
+        require(_exists(vcId), "DevDIDs: this vs does not exists");
+        return verifiableCredentials[vcId];
     }
 
     function vcsOfIssuer(
