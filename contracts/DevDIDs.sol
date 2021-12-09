@@ -13,27 +13,10 @@ pragma solidity ^0.8.10;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "./interfaces/IVerifiableCredential.sol";
 
-contract DevDIDs is ERC721 {
+contract DevDIDs is ERC721, IVerifiableCredential {
     using Counters for Counters.Counter;
-
-    /* ========== STRUCTS ========== */
-
-    struct VerifiableCredential {
-        address issuer;
-        address holder;
-        string subject;
-        string data;
-        uint validFrom;
-        uint validTo;
-        bool suspended;
-    }
-
-    struct VerifiablePresentation {
-        uint[] vcs;
-        uint validFrom;
-        uint validTo;
-    }
 
     /* ========== STATE VARIABLES ========== */
 
@@ -41,13 +24,6 @@ contract DevDIDs is ERC721 {
     mapping(uint => VerifiableCredential) private verifiableCredentials;
     mapping(address => uint[]) private verifiableCredentialIssuers;
     mapping(address => uint[]) private verifiableCredentialHolders;
-
-    /* ========== EVENTS ========== */
-
-    event Issue(address issuer, address holder, uint vcId);
-    event Revoke(address issuer, address holder, uint vcId);
-    event Suspend(address issuer, address holder, uint vcId, bool suspended);
-    event Delete(address holder, address issuer, uint vcId);
 
     /* ========== CONSTRUCTOR ========== */
 
@@ -63,6 +39,7 @@ contract DevDIDs is ERC721 {
         uint validTo_
     )
         external
+        override
         returns(uint vcId)
     {
         // reject self issuing
@@ -95,6 +72,7 @@ contract DevDIDs is ERC721 {
         uint vcId
     )
         external
+        override
     {
         VerifiableCredential memory vc = verifiableCredentials[vcId];
         require(vc.issuer == msg.sender, "DevDIDs: you cannot revoke vc that you not issued");
@@ -111,6 +89,7 @@ contract DevDIDs is ERC721 {
         bool suspended
     )
         external
+        override
     {
         VerifiableCredential storage vc = verifiableCredentials[vcId];
         require(vc.issuer == msg.sender, "DevDIDs: you cannot change suspended status of vc that you not issued");
@@ -124,6 +103,7 @@ contract DevDIDs is ERC721 {
         uint vcId
     )
         external
+        override
     {
         VerifiableCredential memory vc = verifiableCredentials[vcId];
         require(vc.holder == msg.sender, "DevDIDs: you cannot delete vc that you not held");
@@ -143,6 +123,7 @@ contract DevDIDs is ERC721 {
     )
         external
         view
+        override
         returns(VerifiableCredential memory)
     {
         require(_exists(vcId), "DevDIDs: this vs does not exists");
@@ -154,6 +135,7 @@ contract DevDIDs is ERC721 {
     )
         external
         view
+        override
         returns(uint[] memory)
     {
         return verifiableCredentialIssuers[address_];
@@ -164,6 +146,7 @@ contract DevDIDs is ERC721 {
     )
         external
         view
+        override
         returns(uint[] memory)
     {
         return verifiableCredentialHolders[address_];
@@ -176,6 +159,7 @@ contract DevDIDs is ERC721 {
     )
         external
         view
+        override
         returns(VerifiablePresentation memory vp)
     {
         // require valid to is greater than valid from
@@ -209,6 +193,7 @@ contract DevDIDs is ERC721 {
     )
         external
         view
+        override
         returns(bool, string memory)
     {
         if (currentDate < vp.validFrom || currentDate > vp.validTo) {
