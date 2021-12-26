@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
+// eslint-disable-next-line node/no-missing-import
 import { DevDIDs } from "../typechain";
 
 describe("Holder", async () => {
@@ -101,5 +102,33 @@ describe("Holder", async () => {
     ).to.be.revertedWith(
       "DevDIDs: vp valid from must be greater than valid to"
     );
+  });
+
+  it("after Delete balance should be 2", async function () {
+    const [, addr1] = await ethers.getSigners();
+
+    await devDIDs.issue(
+      addr1.address,
+      "Zahra MohammadPour",
+      "Has completed first sprint1",
+      5,
+      20
+    );
+    await devDIDs.issue(
+      addr1.address,
+      "Zahra MohammadPour",
+      "Has completed first sprint2",
+      5,
+      20
+    );
+    await devDIDs.issue(
+      addr1.address,
+      "Zahra MohammadPour",
+      "Has completed first sprint3",
+      5,
+      20
+    );
+    await devDIDs.connect(addr1).delete_(2);
+    expect(await devDIDs.balanceOf(addr1.address)).to.equal(2);
   });
 });
