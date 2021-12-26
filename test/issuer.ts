@@ -135,4 +135,42 @@ describe("Issuer", async () => {
     await devDIDs.revoke(2);
     expect(await devDIDs.balanceOf(addr1.address)).to.equal(2);
   });
+
+  it("Only the issuer can revoke the vc", async function () {
+    const [, addr1] = await ethers.getSigners();
+    await devDIDs.issue(
+      addr1.address,
+      "Zahra MohammadPour",
+      "Has completed first sprint",
+      5,
+      20
+    );
+    await devDIDs.issue(
+      addr1.address,
+      "Zahra MohammadPour",
+      "Has got driving license",
+      5,
+      20
+    );
+    await devDIDs.issue(
+      addr1.address,
+      "Zahra MohammadPour",
+      "Has completed her course",
+      5,
+      20
+    );
+    await expect(
+      devDIDs.connect(addr1).revoke(2)
+    ).to.be.revertedWith("DevDIDs: you cannot revoke vc that you not issued");
+
+  });
+
+  it("The vc that does not exist can not be revoked", async function () {
+    const [, addr1] = await ethers.getSigners();
+    await expect(
+      devDIDs.connect(addr1).revoke(2)
+    ).to.be.revertedWith("DevDIDs: you cannot revoke vc that you not issued");
+
+  });
+
 });

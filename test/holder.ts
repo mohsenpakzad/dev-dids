@@ -131,4 +131,41 @@ describe("Holder", async () => {
     await devDIDs.connect(addr1).delete_(2);
     expect(await devDIDs.balanceOf(addr1.address)).to.equal(2);
   });
+
+  it("Only the holder can delete the vc", async function () {
+    const [, addr1] = await ethers.getSigners();
+    await devDIDs.issue(
+      addr1.address,
+      "Zahra MohammadPour",
+      "Has completed first sprint",
+      5,
+      20
+    );
+    await devDIDs.issue(
+      addr1.address,
+      "Zahra MohammadPour",
+      "Has got driving license",
+      5,
+      20
+    );
+    await devDIDs.issue(
+      addr1.address,
+      "Zahra MohammadPour",
+      "Has completed her course",
+      5,
+      20
+    );
+    await expect(
+      devDIDs.delete_(2)
+    ).to.be.revertedWith("DevDIDs: you cannot delete vc that you not held");
+
+  });
+
+  it("The vc that does not exist can not be deleted", async function () {
+    const [, addr1] = await ethers.getSigners();
+    await expect(
+      devDIDs.connect(addr1).delete_(2)
+    ).to.be.revertedWith("DevDIDs: you cannot delete vc that you not held");
+
+  });
 });
